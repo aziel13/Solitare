@@ -99,6 +99,7 @@ public class GameManager : MonoBehaviour
         GenerateDeck();
 
         Shuffle(_deck);
+        
         SolitaireSort();
         StartCoroutine(SolitaireDeal());
         SortDeckIntoTrips();
@@ -494,7 +495,7 @@ public class GameManager : MonoBehaviour
         }
 
         
-            _discardPile.RemoveAll(cardScriptableObject => cardScriptableObject == cardScriptableObjectToRemove);
+        _discardPile.RemoveAll(cardScriptableObject => cardScriptableObject == cardScriptableObjectToRemove);
 
         // Debug.Log($"itemsRemoved: {itemsRemoved}");
 

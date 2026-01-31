@@ -41,9 +41,12 @@ public class Foundation : MonoBehaviour
         {
             if (canBeStacked(e.previousObject))
             {
-                
-                e.previousObject.GetComponent<Card>().MoveCard(e.currentGameObject,e.previousObject);
-                
+                if (e.previousObject.TryGetComponent(out Card card) && (card.IsTopCard() || GameManager.Instance.IsInTripOnDisplay(card.CardScriptableObject)))
+                {
+                    
+                    card.MoveCard(e.currentGameObject,e.previousObject);
+                    
+                }
             }
             else
             {

@@ -39,7 +39,11 @@ public class Tableau : MonoBehaviour
         {
             if (canBeStacked(e.previousObject))
             {
-                e.previousObject.GetComponent<Card>().MoveCard(e.currentGameObject,e.previousObject);
+                if (e.previousObject.TryGetComponent(out Card card) && (card.IsTopCard() || GameManager.Instance.IsInTripOnDisplay(card.CardScriptableObject)))
+                {
+                    e.previousObject.GetComponent<Card>().MoveCard(e.currentGameObject,e.previousObject);
+                }
+               
             }
             else
             {
@@ -57,9 +61,13 @@ public class Tableau : MonoBehaviour
     
     private bool canBeStacked(GameObject gameobject)
     {
-        if (gameobject.TryGetComponent(out Card card))
+        gameobject.TryGetComponent(out Card card);
+        
+        Debug.Log($"Card: {card.CardScriptableObject.ToString()} gameobject.transform.childCount: {gameobject.transform.childCount}");
+        
+        if (card != null)
         {
-            if ( card.CardScriptableObject.Value == CardIdentity.CardValue.king && GameManager.Instance.Tableaus[GetColumnNumberListIndexFormat()].Count == 0)
+            if ( card.CardScriptableObject.Value == CardIdentity.CardValue.king && gameobject.transform.childCount == 0)
             {
                 Debug.Log("Stackable");
                 return true;

@@ -38,7 +38,8 @@ public class Card : MonoBehaviour
      {
           if (e.currentObject == gameObject)
           {
-
+               //if this is the top card it should be face up.
+               
                if (e.action == CardActions.actions.selectCard)
                {
                     gameObject.GetComponent<UpdateSprite>().SetCardSelected(true);
@@ -59,6 +60,8 @@ public class Card : MonoBehaviour
                          Card cardToMove = e.previousObject.GetComponent<Card>();
                          bool canBeStacked = CanBeStacked(cardToMove);
 
+                         Debug.Log($"canBeStacked {canBeStacked}");
+                         
                          if (CanBeStacked(cardToMove) && cardToMove.faceUp)
                          {
 
@@ -105,43 +108,25 @@ public class Card : MonoBehaviour
                     }
                }
           }
-
-
      }
 
      public bool IsTopCard()
      {
 
-          int columnNumber = -1;
-          int topCardIndex = -1;
-
           if (transform.parent.TryGetComponent<Foundation>(out Foundation foundation))
           {
-               var foundations = GameManager.Instance.Foundations;
-
-               columnNumber = foundation.GetColumnNumberListIndexFormat();
-               topCardIndex = foundations[columnNumber].Count - 1;
-
-               if (foundations[columnNumber][topCardIndex] == CardScriptableObject)
+               if ( foundation.transform.GetChild(foundation.transform.childCount - 1).GetComponentInChildren<Card>().CardScriptableObject == CardScriptableObject)
                {
                     return true;
                }
-
           }
 
           if (transform.parent.TryGetComponent<Tableau>(out Tableau tableau))
           {
-
-               var tableaus = GameManager.Instance.Tableaus;
-
-               columnNumber = tableau.GetColumnNumberListIndexFormat();
-               topCardIndex = tableaus[columnNumber].Count - 1;
-
-               if (tableaus[columnNumber][topCardIndex] == CardScriptableObject)
+               if (tableau.transform.GetChild(tableau.transform.childCount - 1).GetComponentInChildren<Card>().CardScriptableObject == CardScriptableObject)
                {
                     return true;
                }
-
           }
 
           return false;
@@ -179,14 +164,18 @@ public class Card : MonoBehaviour
                }
                else
                {
+                    Debug.Log($"!IsInDeck(): {!IsInDeck()}");
+                    
                     //if the target card is on the tableau
                     if (!IsInDeck())
                     {
-
+                         Debug.Log($"_cardScriptableObject.numericValue() - 1 == previousCardScriptableObject.numericValue(): {_cardScriptableObject.numericValue() - 1 == previousCardScriptableObject.numericValue()}");
                          if (_cardScriptableObject.numericValue() - 1 == previousCardScriptableObject.numericValue())
                          {
+                              Debug.Log($"_cardScriptableObject.getSuiteColor() != previousCardScriptableObject.getSuiteColor(): {_cardScriptableObject.getSuiteColor() != previousCardScriptableObject.getSuiteColor()}");
                               if (_cardScriptableObject.getSuiteColor() != previousCardScriptableObject.getSuiteColor())
                               {
+                                   Debug.Log($"IsTopCard(): {IsTopCard()}");
                                    if (IsTopCard())
                                    {
                                         return true;
@@ -257,30 +246,38 @@ public class Card : MonoBehaviour
           int indexOfCard = previousObject.transform.GetSiblingIndex();
 
           List<GameObject> stackToMove = new List<GameObject>();
-          for (int i = indexOfCard; i < previousObject.transform.parent.childCount; i++)
+          for (int i = indexOfCard ; i < previousObject.transform.parent.childCount; i++)
           {
+               if (i == indexOfCard)
+               {
+                    stackToMove.Add(previousObject);
+               }
+               else
+               {
 
-               stackToMove.Add(previousObject.transform.parent.GetChild(i).gameObject);
+                    stackToMove.Add(previousObject.transform.parent.GetChild(i).gameObject);
+                    
+               }
 
           }
 
-          float yOffset =  -2.5f;
-          float zOffset = -0.2f;
-          float yOffsetIncrementValue = 0.5f;
-          float zOffsetIncrementValue = 0.2f;
+          float yOffset = -0.75f;
+          float zOffset = -0.5f;
+          float yOffsetIncrementValue = -0.5f;
+          float zOffsetIncrementValue = -0.5f;
 
           foreach (GameObject cardGameObject in stackToMove)
           {
-
-               Vector3 childPosition = new Vector3(moveTargetGameObject.transform.position.x,
-                    moveTargetGameObject.transform.position.y + yOffset, moveTargetGameObject.transform.position.z + zOffset);
+               cardGameObject.transform.SetParent(moveTargetGameObject.transform.parent, false);
+               
+               Vector3 childPosition = new Vector3(moveTargetGameObject.transform.localPosition.x,
+                    moveTargetGameObject.transform.localPosition.y + yOffset, moveTargetGameObject.transform.localPosition.z + zOffset);
 
                cardGameObject.transform.localPosition = childPosition;
                cardGameObject.GetComponent<UpdateSprite>().SetCardSelected(false);
 
                yOffset += yOffsetIncrementValue;
                zOffset += zOffsetIncrementValue;
-
           }
 
           GameInput.Instance.PreviouslySelected = null;
@@ -301,9 +298,6 @@ public class Card : MonoBehaviour
 
           return false;
      }
-
-
-     
 
      public bool IsOnTableau()
      {
