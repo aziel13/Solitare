@@ -535,7 +535,7 @@ public class GameManager : MonoBehaviour
             float xOffset = 2.5f;
             float zOffset = -0.2f;
             float xOffsetIncrementValue = 0.5f;
-            float zOffsetIncrementValue = 0.2f;
+            float zOffsetIncrementValue = -0.2f;
 
             foreach (CardScriptableObject card in _deckTrips[deckLocation])
             {

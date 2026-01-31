@@ -42,22 +42,34 @@ public class Card : MonoBehaviour
                
                if (e.action == CardActions.actions.selectCard)
                {
+                    
+                    if (GameManager.Instance.IsInTripOnDisplay(CardScriptableObject) && !IsTopCard())
+                    {
+                         return;
+                    }
+                    
                     gameObject.GetComponent<UpdateSprite>().SetCardSelected(true);
-
                     if (IsTopCard())
                     {
                          FlipCard(true);
                     }
-
                }
 
                if (e.action == CardActions.actions.stackOnCard)
                {
-
-                    if (e.previousObject.TryGetComponent<Card>(out Card card))
+                    e.previousObject.TryGetComponent<Card>(out Card cardToMove);
+                    
+                    if (cardToMove != null)
                     {
+                         
+                         e.currentObject.TryGetComponent<Card>(out Card selectedCard);
 
-                         Card cardToMove = e.previousObject.GetComponent<Card>();
+                         
+                         if (GameManager.Instance.IsInTripOnDisplay(selectedCard.CardScriptableObject) && !selectedCard.IsTopCard())
+                         {
+                              return;
+                         }
+
                          bool canBeStacked = CanBeStacked(cardToMove);
 
                          Debug.Log($"canBeStacked {canBeStacked}");
@@ -65,7 +77,7 @@ public class Card : MonoBehaviour
                          if (CanBeStacked(cardToMove) && cardToMove.faceUp)
                          {
 
-                              if (cardToMove.IsTopCard() || cardToMove.isInDisplayedTrips())
+                              if (cardToMove.IsTopCard())
                               {
 
                                    MoveCard(e.currentObject, e.previousObject);
@@ -89,14 +101,23 @@ public class Card : MonoBehaviour
                               GameInput.Instance.PreviouslySelected = gameObject;
                               gameObject.GetComponent<UpdateSprite>().SetCardSelected(true);
                          }
-
                          if (IsTopCard())
                          {
                               FlipCard(true);
                          }
+                        
                     }
-                    else if (!e.previousObject.TryGetComponent<Card>(out Card otherCard))
+                    else
                     {
+                         
+                         e.currentObject.TryGetComponent<Card>(out Card selectedCard);
+                         
+                         
+                         if (GameManager.Instance.IsInTripOnDisplay(selectedCard.CardScriptableObject) && !selectedCard.IsTopCard())
+                         {
+                              return;
+                         }
+
                          e.currentObject.GetComponent<UpdateSprite>().SetCardSelected(true);
                          GameInput.Instance.PreviouslySelected = gameObject;
 
@@ -128,6 +149,15 @@ public class Card : MonoBehaviour
                     return true;
                }
           }
+
+          if (transform.parent.TryGetComponent<Stockpile>(out Stockpile stockpile))
+          {
+               if (stockpile.transform.GetChild(stockpile.transform.childCount - 1).GetComponentInChildren<Card>().CardScriptableObject == CardScriptableObject)
+               {
+                    return true;
+               }
+          }
+
 
           return false;
      }
